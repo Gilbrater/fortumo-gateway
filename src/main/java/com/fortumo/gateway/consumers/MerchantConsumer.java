@@ -5,6 +5,7 @@ import com.fortumo.gateway.models.MerchantRequest;
 import com.fortumo.gateway.models.MerchantResponse;
 import com.fortumo.gateway.models.Request;
 import com.fortumo.gateway.models.SmsContentRequest;
+import com.fortumo.gateway.utils.RetryQueueInsertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class MerchantConsumer {
     @Autowired
     private MerchantClient merchantClient;
 
+    @Autowired
     private JmsTemplate jmsTemplate;
 
     @Value("${merchant.urls}")
@@ -48,27 +50,28 @@ public class MerchantConsumer {
         if(!merchantResponse.hasError()){
             SmsContentRequest smsContentRequest = createSMSContentRequest(merchantRequest, merchantResponse);
             sendToMerchantToProviderQueue(smsContentRequest);
-            logger.info("Message queued by merchant - ",merchantRequest.toString());
+            logger.info("Message queued by merchant - " + merchantRequest.toString());
         }else{
             sendToProviderToMerchantQueue(merchantRequest);
+            logger.info("Message requeued by retry - "+ merchantRequest.toString());
         }
     }
 
     private void sendToProviderToMerchantQueue(MerchantRequest merchantRequest){
         try{
             jmsTemplate.convertAndSend(providerToMerchantQueue, merchantRequest);
-        }catch (JmsException e){
-            logger.error(e.getMessage());
-            placeMessageInQueueRetryTable(merchantRequest, providerToMerchantQueueRetryTable);
+        }catch (JmsException | NullPointerException e){
+            logger.error("Message not queued in providerToMerchantQueue - "+ merchantRequest.toString()+ " - " +e.getMessage());
+            providerToMerchantQueueRetryTable=RetryQueueInsertUtil.RetryQueueInsert(merchantRequest, providerToMerchantQueueRetryTable);
         }
     }
 
     private void sendToMerchantToProviderQueue(SmsContentRequest smsContentRequest){
         try{
             jmsTemplate.convertAndSend(merchantToProviderQueue, smsContentRequest);
-        }catch (JmsException e){
-            logger.error(e.getMessage());
-            placeMessageInQueueRetryTable(smsContentRequest, providerToMerchantQueueRetryTable);
+        }catch (JmsException | NullPointerException e){
+            logger.error("Message not queued in merchantToProviderQueue - "+ smsContentRequest.toString()+ " - " +e.getMessage());
+            merchantToProviderQueueRetryTable=RetryQueueInsertUtil.RetryQueueInsert(smsContentRequest, merchantToProviderQueueRetryTable);
         }
     }
 
@@ -80,9 +83,5 @@ public class MerchantConsumer {
         smsContentRequest.setMessage(merchantNotificationResponse.getReplyMessage());
         smsContentRequest.setId(merchantRequest.getTransactionId());
         return smsContentRequest;
-    }
-
-    private void placeMessageInQueueRetryTable(Request Request, ConcurrentMap queueRetryTable){
-        //Create ExecutorService for each failed attempt to put in queue
     }
 }
