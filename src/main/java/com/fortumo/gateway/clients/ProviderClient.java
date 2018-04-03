@@ -35,7 +35,9 @@ public class ProviderClient {
             HttpEntity entity = new HttpEntity<>(headers);
             String providerUrl = buildURL(url, smsContentRequest);
 
+            logger.info("Message content sent to user - "+smsContentRequest.toString());
             ResponseEntity response = restTemplate.exchange(providerUrl, HttpMethod.GET, entity, String.class);
+            logger.info("Response received from provider with a status code of - "+response.getStatusCodeValue()+" - for message content - "+smsContentRequest.toString());
             if(response.getStatusCode()== HttpStatus.OK){
                 return true;
             }

@@ -44,7 +44,7 @@ public class MerchantClient {
             HttpEntity entity = new HttpEntity<>(merchantRequest, headers);
             logger.info("Message sent to merchant - "+merchantRequest.toString());
             ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-            logger.info("Response from merchant for message - "+merchantRequest.toString()+" - received from merchant with a status code of - "+response.getStatusCodeValue());
+            logger.info("Response received from merchant with a status code of - "+response.getStatusCodeValue() +" - for message - "+merchantRequest.toString());
 
             if(response.getStatusCodeValue()==302 || response.getStatusCodeValue()==500){
                 throw new HttpServerErrorException(response.getStatusCode());
