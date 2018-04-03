@@ -2,8 +2,7 @@ package com.fortumo.gateway.models;
 
 import javax.validation.constraints.NotNull;
 
-public class ProviderRequest {
-    private String id;
+public class ProviderRequest extends Request{
     private String messageId;
     @NotNull
     private String sender;
@@ -14,14 +13,6 @@ public class ProviderRequest {
     @NotNull
     private String operator;
     private String timestamp;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getMessageId() {
         return messageId;
@@ -74,7 +65,7 @@ public class ProviderRequest {
     @Override
     public String toString(){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("id: ").append(id).append(", ")
+        stringBuilder.append("id: ").append(getId()).append(", ")
                 .append("messageId: ").append(messageId).append(", ")
                 .append("sender: ").append(sender).append(", ")
                 .append("text: ").append(text).append("\n")

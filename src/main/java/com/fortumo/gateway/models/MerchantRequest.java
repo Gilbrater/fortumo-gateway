@@ -2,7 +2,7 @@ package com.fortumo.gateway.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MerchantRequest {
+public class MerchantRequest extends Request{
     private int shortcode;
     private String keyword;
     private String message;
@@ -71,13 +71,14 @@ public class MerchantRequest {
     @Override
     public String toString(){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("transactionId: ").append(transactionId).append(", ")
+        stringBuilder.append("id: ").append(getId()).append(", ")
                 .append("message: ").append(message).append(", ")
                 .append("moMessageId: ").append(moMessageId).append(", ")
                 .append("sender: ").append(sender).append(", ")
                 .append("shortcode: ").append(shortcode).append(", ")
                 .append("operator: ").append(operator).append(", ")
-                .append("keyword: ").append(keyword);
+                .append("keyword: ").append(keyword).append(", ")
+                .append("transactionId: ").append(transactionId);
         return stringBuilder.toString();
     }
 }

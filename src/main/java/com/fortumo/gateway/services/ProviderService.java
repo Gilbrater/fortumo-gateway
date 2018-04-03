@@ -31,8 +31,13 @@ public class ProviderService {
             return "Merchant not found";
         }
         merchantRequest.setKeyword(keyword);
-        logger.info(merchantRequest.toString());
-        return (sendToMerchant(merchantRequest))?"OK":"FAILED";
+        String sentToMerchant = (sendToMerchant(merchantRequest))?"OK":"FAILED";
+        if(sentToMerchant.equals("OK")){
+            logger.info("Notification queued for merchant - ",merchantRequest.toString());
+        }else{
+            logger.info("Notification not queued for merchant - ",merchantRequest.toString());
+        }
+        return sentToMerchant;
     }
 
     private boolean sendToMerchant(MerchantRequest merchantRequest){
@@ -43,17 +48,19 @@ public class ProviderService {
             return false;
         }
         return true;
+
     }
 
     private MerchantRequest createMerchantRequest(ProviderRequest providerRequest){
-        MerchantRequest merchantNotificationRequest = new MerchantRequest();
-        merchantNotificationRequest.setMessage(providerRequest.getText());
-        merchantNotificationRequest.setOperator(providerRequest.getOperator());
-        merchantNotificationRequest.setSender(providerRequest.getSender());
-        merchantNotificationRequest.setShortcode(providerRequest.getReceiver());
-        merchantNotificationRequest.setTransactionId(providerRequest.getId());
-        merchantNotificationRequest.setMoMessageId(providerRequest.getMessageId());
-        return merchantNotificationRequest;
+        MerchantRequest merchantRequest = new MerchantRequest();
+        merchantRequest.setId(providerRequest.getId());
+        merchantRequest.setMessage(providerRequest.getText());
+        merchantRequest.setOperator(providerRequest.getOperator());
+        merchantRequest.setSender(providerRequest.getSender());
+        merchantRequest.setShortcode(providerRequest.getReceiver());
+        merchantRequest.setTransactionId(providerRequest.getId());
+        merchantRequest.setMoMessageId(providerRequest.getMessageId());
+        return merchantRequest;
     }
 
     private String getKeyword(String message){
