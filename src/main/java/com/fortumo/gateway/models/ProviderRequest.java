@@ -1,13 +1,19 @@
 package com.fortumo.gateway.models;
 
+import javax.validation.constraints.NotNull;
+
 public class ProviderRequest {
-    String id;
-    String messageId;
-    String sender;
-    String text;
-    int receiver;
-    String operator;
-    String timestamp;
+    private String id;
+    private String messageId;
+    @NotNull
+    private String sender;
+    @NotNull
+    private String text;
+    @NotNull
+    private int receiver;
+    @NotNull
+    private String operator;
+    private String timestamp;
 
     public String getId() {
         return id;
