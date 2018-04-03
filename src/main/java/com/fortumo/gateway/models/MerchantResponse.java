@@ -18,6 +18,14 @@ public class MerchantResponse {
         this.replyMessage = replyMessage;
     }
 
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
