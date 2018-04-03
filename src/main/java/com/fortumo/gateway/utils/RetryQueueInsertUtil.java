@@ -6,8 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class RetryQueueInsertUtil {
-    public static ConcurrentMap RetryQueueInsert(Request request, ConcurrentMap concurrentMap){
+    public static void RetryQueueInsert(Request request, ConcurrentMap concurrentMap){
         //Create ScheduledExecutorService and insert in map
-        return concurrentMap;
     }
 }

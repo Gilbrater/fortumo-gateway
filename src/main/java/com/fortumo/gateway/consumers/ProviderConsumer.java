@@ -33,8 +33,12 @@ public class ProviderConsumer {
 
     @JmsListener(destination = merchantToProviderQueue, containerFactory = "myFactory")
     public void receiveFromMerchantToProviderQueue(SmsContentRequest smsContentRequest){
+        logger.info("Message content received by provider consumer - "+smsContentRequest.toString());
         if(!providerClient.notifyUser(smsContentRequest)){
             sendToMerchantToProviderQueue(smsContentRequest);
+            logger.info("Message requeued for provider consumer retry - "+ smsContentRequest.toString());
+        }else{
+            logger.info("Message content sent successfully to user - "+smsContentRequest.toString());
         }
     }
 
@@ -42,8 +46,8 @@ public class ProviderConsumer {
         try{
             jmsTemplate.convertAndSend(merchantToProviderQueue, smsContentRequest);
         }catch (JmsException e){
-            logger.error(e.getMessage());
-            merchantToProviderQueueRetryTable=RetryQueueInsertUtil.RetryQueueInsert(smsContentRequest, merchantToProviderQueueRetryTable);
+            logger.error("Message not queued for retry in merchantToProviderQueue - "+ smsContentRequest.toString()+ " - " +e.getMessage());
+            RetryQueueInsertUtil.RetryQueueInsert(smsContentRequest, merchantToProviderQueueRetryTable);
         }
 
     }

@@ -33,9 +33,7 @@ public class ProviderService {
         merchantRequest.setKeyword(keyword);
         String sentToMerchant = (sendToMerchant(merchantRequest))?"OK":"FAILED";
         if(sentToMerchant.equals("OK")){
-            logger.info("Notification queued for merchant - ",merchantRequest.toString());
-        }else{
-            logger.info("Notification not queued for merchant - ",merchantRequest.toString());
+            logger.info("Message queued for merchant consumer- "+merchantRequest.toString());
         }
         return sentToMerchant;
     }
@@ -44,7 +42,7 @@ public class ProviderService {
         try{
             jmsTemplate.convertAndSend(providerToMerchantQueue, merchantRequest);
         }catch (JmsException e){
-            logger.error(e.getMessage(), merchantRequest.toString());
+            logger.error("Message not queued for merchant consumer - "+ merchantRequest.toString()+" - "+e.getMessage());
             return false;
         }
         return true;

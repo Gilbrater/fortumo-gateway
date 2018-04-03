@@ -45,15 +45,15 @@ public class MerchantConsumer {
 
     @JmsListener(destination = providerToMerchantQueue, containerFactory = "myFactory")
     public void receiveFromProviderToMerchantQueue(MerchantRequest merchantRequest){
-        logger.info("Message picked by merchant - ",merchantRequest.toString());
+        logger.info("Message received by merchant consumer- "+merchantRequest.toString());
         MerchantResponse merchantResponse  = merchantClient.notifyMerchant(merchantRequest);
         if(!merchantResponse.hasError()){
             SmsContentRequest smsContentRequest = createSMSContentRequest(merchantRequest, merchantResponse);
             sendToMerchantToProviderQueue(smsContentRequest);
-            logger.info("Message queued by merchant - " + merchantRequest.toString());
+            logger.info("Message content queued for provider consumer- " + merchantRequest.toString());
         }else{
             sendToProviderToMerchantQueue(merchantRequest);
-            logger.info("Message requeued by retry - "+ merchantRequest.toString());
+            logger.info("Message requeued for merchant consumer retry - "+ merchantRequest.toString());
         }
     }
 
@@ -62,7 +62,7 @@ public class MerchantConsumer {
             jmsTemplate.convertAndSend(providerToMerchantQueue, merchantRequest);
         }catch (JmsException | NullPointerException e){
             logger.error("Message not queued in providerToMerchantQueue - "+ merchantRequest.toString()+ " - " +e.getMessage());
-            providerToMerchantQueueRetryTable=RetryQueueInsertUtil.RetryQueueInsert(merchantRequest, providerToMerchantQueueRetryTable);
+            RetryQueueInsertUtil.RetryQueueInsert(merchantRequest, providerToMerchantQueueRetryTable);
         }
     }
 
@@ -71,7 +71,7 @@ public class MerchantConsumer {
             jmsTemplate.convertAndSend(merchantToProviderQueue, smsContentRequest);
         }catch (JmsException | NullPointerException e){
             logger.error("Message not queued in merchantToProviderQueue - "+ smsContentRequest.toString()+ " - " +e.getMessage());
-            merchantToProviderQueueRetryTable=RetryQueueInsertUtil.RetryQueueInsert(smsContentRequest, merchantToProviderQueueRetryTable);
+            RetryQueueInsertUtil.RetryQueueInsert(smsContentRequest, merchantToProviderQueueRetryTable);
         }
     }
 
