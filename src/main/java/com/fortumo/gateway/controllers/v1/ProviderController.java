@@ -15,7 +15,7 @@ public class ProviderController {
     private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 
     @Autowired
-    public ProviderService providerService;
+    private ProviderService providerService;
 
     @RequestMapping(method= RequestMethod.GET)
     @ResponseBody
@@ -23,6 +23,6 @@ public class ProviderController {
         providerRequest.setMessageId(messageId);
         providerRequest.setId(UUID.randomUUID().toString());
         logger.info(providerRequest.toString());
-        return "OK";
+        return providerService.paymentNotification(providerRequest);
     }
 }
