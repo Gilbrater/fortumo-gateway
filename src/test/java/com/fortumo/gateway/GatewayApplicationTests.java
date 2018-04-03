@@ -27,21 +27,21 @@ public class GatewayApplicationTests {
     private TestRestTemplate restTemplate;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp(){
         this.base = new StringBuilder("http://localhost:").append(port).append("/api/v1/sms");
     }
 
     @Test
-    public void receivePaymentNotificationSuccess() throws Exception {
+    public void receivePaymentNotificationSuccess(){
         base.append("?message_id=e39ce00e-f8b5-4b0b-96ce-d68f94525704&operator=Etisalat&receiver=13011&sender=%2B37255555555&text=TXT+COINS&timestamp=2017-11-03+12%3A32%3A13");
         ResponseEntity<String> response = restTemplate.getForEntity(base.toString(), String.class);
         assertThat(response.getBody(), equalTo("OK"));
     }
 
     @Test
-    public void receivePaymentNotificationInvalidMerchantCode() throws Exception {
+    public void receivePaymentNotificationInvalidMerchantCode(){
         base.append("?message_id=e39ce00e-f8b5-4b0b-96ce-d68f94525704&operator=Etisalat&receiver=13011&sender=%2B37255555555&text=THT+COINS&timestamp=2017-11-03+12%3A32%3A13");
         ResponseEntity<String> response = restTemplate.getForEntity(base.toString(), String.class);
-        assertThat(response.getBody(), equalTo("MERCHANT NOT FOUND"));
+        assertThat(response.getBody(), equalTo("Merchant not found"));
     }
 }

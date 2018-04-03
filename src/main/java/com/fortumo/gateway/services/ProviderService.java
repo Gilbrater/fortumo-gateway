@@ -5,12 +5,19 @@ import com.fortumo.gateway.models.ProviderRequest;
 import com.fortumo.gateway.utils.MerchantUrlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.JmsException;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProviderService {
-    public static final Logger logger = LoggerFactory.getLogger(ProviderService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderService.class);
+
+    @Autowired
+    private JmsTemplate jmsTemplate;
+    private final String providerToMerchantQueue="ProviderToMerchantQueue";
 
     @Value("${merchant.urls}")
     private String merchants;
@@ -20,10 +27,22 @@ public class ProviderService {
         String keyword = getKeyword(merchantRequest.getMessage());
         MerchantUrlUtil merchantURLSUtil = MerchantUrlUtil.getInstance(merchants);
         if(!merchantURLSUtil.hasMerchant(keyword)){
-            return "MERCHANT NOT FOUND";
+            logger.debug("Merchant not found for keyword: "+keyword+" "+merchantRequest.toString());
+            return "Merchant not found";
         }
         merchantRequest.setKeyword(keyword);
-        return "OK";
+        logger.info(merchantRequest.toString());
+        return (sendToMerchant(merchantRequest))?"OK":"FAILED";
+    }
+
+    private boolean sendToMerchant(MerchantRequest merchantRequest){
+        try{
+            jmsTemplate.convertAndSend(providerToMerchantQueue, merchantRequest);
+        }catch (JmsException e){
+            logger.error(e.getMessage(), merchantRequest.toString());
+            return false;
+        }
+        return true;
     }
 
     private MerchantRequest createMerchantRequest(ProviderRequest providerRequest){
